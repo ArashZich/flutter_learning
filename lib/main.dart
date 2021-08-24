@@ -1,6 +1,8 @@
 import 'dart:ui';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:weather/Model/CurrentCityData.dart';
 
 void main() {
   runApp(MaterialApp(debugShowCheckedModeBanner: false, home: MyApp()));
@@ -15,6 +17,14 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   TextEditingController textEditingController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    sendRequestCurrentWeather();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -280,5 +290,44 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
+  }
+
+  void sendRequestCurrentWeather() async {
+    try {
+      var apiKeys = "31609c4f30af7d4dcd65ec3e82e04249";
+      var cityName = "Tehran";
+
+      var response = await Dio().get(
+          'https://api.openweathermap.org/data/2.5/weather',
+          queryParameters: {
+            "q": cityName,
+            "appid": apiKeys,
+            "units": "metric"
+          });
+
+      print(response.data.toString());
+      print(response.statusCode.toString());
+
+      var dataModel = CurrentCityDataModel(
+          response.data['name'],
+          response.data['coord']['lon'],
+          response.data['coord']['lat'],
+          response.data['weather'][0]['main'],
+          response.data['weather'][0]['description'],
+          response.data['main']['temp'],
+          response.data['main']['temp_max'],
+          response.data['main']['temp_min'],
+          response.data['main']['pressure'],
+          response.data['main']['humidity'],
+          response.data['wind']['speed'],
+          response.data['dt'],
+          response.data['sys']['country'],
+          response.data['sys']['sunrise'],
+          response.data['sys']['sunset']);
+
+      // var DataModel
+    } catch (e) {
+      print(e);
+    }
   }
 }
